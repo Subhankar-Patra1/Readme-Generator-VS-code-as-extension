@@ -56,65 +56,20 @@ export interface StreamCallback {
     onRetry?: (attempt: number, delayMs: number) => void;
 }
 
+// Interface for project details
+export interface ProjectDetails {
+    name: string;
+    description?: string;
+    files: string[];
+    dependencies?: Record<string, string>;
+    scripts?: Record<string, string>;
+}
+
 /**
  * Sleep for a given number of milliseconds
  */
 function sleep(ms: number): Promise<void> {
     return new Promise(resolve => setTimeout(resolve, ms));
-}
-
-/**
- * Calculate delay with exponential backoff
- */
-function getRetryDelay(attempt: number): number {
-    const delay = INITIAL_DELAY_MS * Math.pow(2, attempt);
-    return Math.min(delay, MAX_DELAY_MS);
-}
-
-/**
- * Make API request with retry logic
- */
-async function fetchWithRetry(
-    url: string,
-    options: RequestInit,
-    maxRetries: number = MAX_RETRIES,
-    onRetry?: (attempt: number, delayMs: number) => void
-): Promise<Response> {
-    let lastError: Error | null = null;
-    
-    for (let attempt = 0; attempt <= maxRetries; attempt++) {
-        try {
-            const response = await fetch(url, options);
-            
-            // If rate limited (429), retry after delay
-            if (response.status === 429 && attempt < maxRetries) {
-                const delayMs = getRetryDelay(attempt);
-                
-                if (onRetry) {
-                    onRetry(attempt + 1, delayMs);
-                }
-                
-                await sleep(delayMs);
-                continue;
-            }
-            
-            return response;
-        } catch (error) {
-            lastError = error instanceof Error ? error : new Error(String(error));
-            
-            if (attempt < maxRetries) {
-                const delayMs = getRetryDelay(attempt);
-                
-                if (onRetry) {
-                    onRetry(attempt + 1, delayMs);
-                }
-                
-                await sleep(delayMs);
-            }
-        }
-    }
-    
-    throw lastError || new Error('Request failed after retries');
 }
 
 /**
@@ -128,7 +83,7 @@ export async function generateWithStreaming(
     const apiKey = await getApiKey();
     
     if (!apiKey) {
-        callbacks.onError(new Error('API key not configured. Please set your OpenRouter API key.'));
+        callbacks.onError(new Error('API key not configured. Please set your Groq API key.'));
         return;
     }
 
@@ -141,6 +96,10 @@ export async function generateWithStreaming(
         const modelName = currentModel.split('/')[1]?.split(':')[0] || currentModel;
         
         try {
+            // Use onToken to send status updates (mapped from onToken in interface)
+            // Note: The interface has onToken, but here we might abuse it for status or add a status callback?
+            // "callbacks.onToken" is likely expected to receive just content.
+            // However, the original code sent "🤖 Using model..." via onToken.
             callbacks.onToken(`🤖 Using model: **${modelName}**\n\n`);
             
             const response = await fetch(OPENROUTER_API_URL, {
@@ -153,7 +112,7 @@ export async function generateWithStreaming(
                 },
                 body: JSON.stringify({
                     model: currentModel,
-                    messages: messages,
+                    messages: messages, // Pass messages directly
                     stream: true,
                     temperature: 0.7,
                     max_tokens: 4096
@@ -195,7 +154,7 @@ export async function generateWithStreaming(
                 
                 // Auth error
                 if (response.status === 401) {
-                    callbacks.onError(new Error('❌ Invalid API key. Please check your OpenRouter API key in settings.'));
+                    callbacks.onError(new Error('❌ Invalid API key. Please check your Groq API key in settings.'));
                     return;
                 }
                 
@@ -245,7 +204,7 @@ export async function generateWithStreaming(
                                     hasReceivedContent = true;
                                 }
                                 fullContent += token;
-                                callbacks.onToken(token);
+                                callbacks.onToken(token); // Use onToken
                             }
                             
                             // Check for error in response
@@ -269,7 +228,7 @@ export async function generateWithStreaming(
                 }
             }
 
-            callbacks.onComplete(fullContent);
+            callbacks.onComplete(fullContent); // Use onComplete
             return; // Success!
             
         } catch (error) {
@@ -288,49 +247,7 @@ export async function generateWithStreaming(
 }
 
 /**
- * Generate README content without streaming (fallback)
- */
-export async function generateNonStreaming(messages: ChatMessage[]): Promise<string> {
-    const apiKey = await getApiKey();
-    
-    if (!apiKey) {
-        throw new Error('API key not configured. Please set your OpenRouter API key.');
-    }
-
-    const response = await fetchWithRetry(
-        OPENROUTER_API_URL,
-        {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${apiKey}`,
-                'Content-Type': 'application/json',
-                'HTTP-Referer': 'https://github.com/ai-readme-generator',
-                'X-Title': 'AI README Generator - VS Code Extension'
-            },
-            body: JSON.stringify({
-                model: getCurrentModel(),
-                messages: messages,
-                stream: false,
-                temperature: 0.7,
-                max_tokens: 4096
-            })
-        }
-    );
-
-    if (!response.ok) {
-        const errorText = await response.text();
-        if (response.status === 429) {
-            throw new Error('⏳ Rate limit reached. Please wait 30-60 seconds and try again.');
-        }
-        throw new Error(`API Error (${response.status}): ${errorText}`);
-    }
-
-    const json = await response.json() as { choices?: { message?: { content?: string } }[] };
-    return json.choices?.[0]?.message?.content || '';
-}
-
-/**
- * Test API connection with a simple request
+ * Test connection to Groq API
  */
 export async function testConnection(): Promise<boolean> {
     try {
@@ -340,6 +257,7 @@ export async function testConnection(): Promise<boolean> {
             return false;
         }
 
+        // Use a lightweight model for connection test
         const response = await fetch(OPENROUTER_API_URL, {
             method: 'POST',
             headers: {
@@ -349,33 +267,15 @@ export async function testConnection(): Promise<boolean> {
                 'X-Title': 'AI README Generator - VS Code Extension'
             },
             body: JSON.stringify({
-                model: getCurrentModel(),
+                model: 'google/gemini-2.0-flash-exp:free',
                 messages: [{ role: 'user', content: 'Hi' }],
                 max_tokens: 5
             })
         });
-
-        // 429 is rate limit, but key is still valid
-        return response.ok || response.status === 429;
-    } catch {
+        
+        return response.ok;
+    } catch (error) {
+        console.error('Connection test failed:', error);
         return false;
     }
-}
-
-/**
- * Get rate limit info
- */
-export function getRateLimitInfo(): string {
-    return `
-📊 OpenRouter Free Tier Limits:
-• Model: Gemini 2.0 Flash Experimental (free)
-• Rate: ~20 requests/minute (shared)
-• Daily: ~200 requests/day
-• Note: Free models share capacity across all users
-
-💡 Tips:
-• Wait 30-60 seconds if rate limited
-• Avoid rapid repeated requests
-• The extension auto-retries up to 3 times
-    `.trim();
 }

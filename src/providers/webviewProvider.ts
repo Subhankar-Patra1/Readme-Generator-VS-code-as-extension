@@ -1279,7 +1279,7 @@ function getWebviewHtml(): string {
         </header>
         
         <div id="api-key-notice" class="api-key-notice" style="display: none;">
-            <span>⚠️ API key not configured. Set your OpenRouter API key to use AI generation.</span>
+            <span>⚠️ API key not configured. Set your Groq API key to use AI generation.</span>
             <button class="btn-primary" onclick="setApiKey()">Set API Key</button>
         </div>
         
