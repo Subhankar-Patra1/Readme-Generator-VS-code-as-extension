@@ -2,7 +2,7 @@
   "name": "ai-readme-generator-pro",
   "displayName": "AI README Generator Pro",
   "description": "Generate professional README files using AI - Free, Fast, and Privacy-focused",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "publisher": "subhankar-patra",
   "engines": {
     "vscode": "^1.85.0"
