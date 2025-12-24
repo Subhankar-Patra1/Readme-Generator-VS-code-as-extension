@@ -106,7 +106,27 @@ function registerCommands(context: vscode.ExtensionContext): void {
     
     // Legacy/Alternative command for manual invocation if needed, mapped to same logic
     const setHuggingFaceApiKeyCmd = vscode.commands.registerCommand('ai-readme.setHuggingFaceApiKey', async () => {
-         vscode.commands.executeCommand('ai-readme.setApiKey');
+    });
+    
+    // View history command
+    const viewHistoryCmd = vscode.commands.registerCommand('ai-readme.viewHistory', async () => {
+        await webviewProvider.createOrShow();
+        // The webview will show history by default
+    });
+    
+    // Regenerate section command (triggered from webview)
+    const regenerateSectionCmd = vscode.commands.registerCommand(
+        'ai-readme.regenerateSection',
+        async (sectionId: string) => {
+            // This is handled by the webview
+            vscode.window.showInformationMessage(`Regenerating section: ${sectionId}`);
+        }
+    );
+    
+    // Export command
+    const exportCmd = vscode.commands.registerCommand('ai-readme.exportReadme', async () => {
+        await webviewProvider.createOrShow();
+        // Export will be handled in webview
     });
     
     // Add all commands to subscriptions
