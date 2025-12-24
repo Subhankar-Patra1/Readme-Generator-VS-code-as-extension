@@ -130,6 +130,8 @@ This extension uses **Gemini 2.0 Flash** via Groq API:
 
 ## 📋 Commands
 
+Access all commands by opening the **Command Palette** (`Ctrl+Shift+P` on Windows/Linux, `Cmd+Shift+P` on Mac) and typing `AI README`:
+
 | Command | Description |
 |---------|-------------|
 | `AI README: Generate README` | Open generator UI |
