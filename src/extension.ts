@@ -8,7 +8,7 @@
  */
 
 import * as vscode from 'vscode';
-import { initializeSecretStorage, setApiKey, hasApiKey, setHuggingFaceApiKey, hasHuggingFaceApiKey, setApiProvider } from './utils/secretStorage';
+import { initializeSecretStorage, setApiKey, hasApiKey, setHuggingFaceApiKey, hasHuggingFaceApiKey, setApiProvider, onDidChange } from './utils/secretStorage';
 import { WebviewProvider } from './providers/webviewProvider';
 import { SidebarProvider } from './providers/sidebarProvider';
 import { testConnection } from './api/openRouterClient';
@@ -28,6 +28,19 @@ export function activate(context: vscode.ExtensionContext) {
     
     // Create webview provider
     webviewProvider = new WebviewProvider(context);
+
+    // Listen for secret storage changes to auto-update UI
+    context.subscriptions.push(
+        onDidChange(async () => {
+             // If API key changed, refresh providers to update UI status
+            if (webviewProvider) {
+                await webviewProvider.refreshData();
+            }
+            if (sidebarProvider) {
+                await sidebarProvider.refresh();
+            }
+        })
+    );
     
     // Create and register sidebar provider
     sidebarProvider = new SidebarProvider(context);

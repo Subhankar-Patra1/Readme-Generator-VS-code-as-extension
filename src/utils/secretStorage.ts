@@ -22,6 +22,16 @@ export function initializeSecretStorage(context: vscode.ExtensionContext): void 
     secretStorage = context.secrets;
 }
 
+/**
+ * Subscribe to secret storage changes
+ */
+export function onDidChange(listener: (e: vscode.SecretStorageChangeEvent) => any): vscode.Disposable {
+    if (!secretStorage) {
+        throw new Error('Secret storage not initialized');
+    }
+    return secretStorage.onDidChange(listener);
+}
+
 // ============================================================================
 // OPENROUTER API KEY
 // ============================================================================

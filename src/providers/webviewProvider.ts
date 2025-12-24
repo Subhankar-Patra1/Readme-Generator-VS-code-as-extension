@@ -14,7 +14,7 @@ import { generateReadme, getPromptPreview, GenerationOptions } from '../generato
 import { buildRefinementPrompt } from '../generator/promptBuilder';
 import { ChatMessage, StreamCallback, generateWithStreaming } from '../api/openRouterClient';
 import { generateWithGroq, ChatMessage as GroqChatMessage, StreamCallback as GroqStreamCallback } from '../api/groqClient';
-import { hasApiKey, getApiKey, hasHuggingFaceApiKey, getApiProvider } from '../utils/secretStorage';
+import { hasApiKey, getApiKey, hasHuggingFaceApiKey, getApiProvider, hasAnyApiKey } from '../utils/secretStorage';
 import { saveVersion, getVersions, getVersionContent, rollbackToVersion, ReadmeVersion } from '../history/historyManager';
 import { readmeExists, showDiff, saveReadme, getExistingReadme, promptForExistingReadme, openReadme } from '../utils/diffHelper';
 import { promptAndExport } from '../utils/fileExporter';
@@ -93,7 +93,7 @@ export class WebviewProvider {
     /**
      * Refresh project data
      */
-    private async refreshData(): Promise<void> {
+    public async refreshData(): Promise<void> {
         if (!this._panel) return;
         
         // Step 1: Show scanning state
@@ -142,7 +142,7 @@ export class WebviewProvider {
         });
         
         // Check API key
-        const hasKey = await hasApiKey();
+        const hasKey = await hasAnyApiKey();
         
         // Step 4: Loading history
         this._panel.webview.postMessage({
