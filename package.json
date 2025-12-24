@@ -1,0 +1,214 @@
+{
+  "name": "ai-readme-generator",
+  "displayName": "AI README Generator",
+  "description": "Generate professional README files using AI - Free, Fast, and Privacy-focused",
+  "version": "1.0.0",
+  "publisher": "your-publisher-id",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Other",
+    "Snippets"
+  ],
+  "keywords": [
+    "readme",
+    "ai",
+    "generator",
+    "documentation",
+    "gemini",
+    "markdown"
+  ],
+  "icon": "assets/icon.png",
+  "galleryBanner": {
+    "color": "#1e1e1e",
+    "theme": "dark"
+  },
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "ai-readme.generate",
+        "title": "Generate README",
+        "category": "AI README"
+      },
+      {
+        "command": "ai-readme.generateForFolder",
+        "title": "Generate README for this folder",
+        "category": "AI README"
+      },
+      {
+        "command": "ai-readme.setApiKey",
+        "title": "Set OpenRouter API Key",
+        "category": "AI README"
+      },
+      {
+        "command": "ai-readme.setHuggingFaceApiKey",
+        "title": "Set Groq API Key (Recommended - Free)",
+        "category": "AI README"
+      },
+      {
+        "command": "ai-readme.viewHistory",
+        "title": "View README History",
+        "category": "AI README"
+      },
+      {
+        "command": "ai-readme.regenerateSection",
+        "title": "Regenerate Section",
+        "category": "AI README"
+      },
+      {
+        "command": "ai-readme.exportReadme",
+        "title": "Export README",
+        "category": "AI README"
+      }
+    ],
+    "menus": {
+      "commandPalette": [
+        {
+          "command": "ai-readme.generate",
+          "when": "workspaceFolderCount > 0"
+        },
+        {
+          "command": "ai-readme.setApiKey"
+        },
+        {
+          "command": "ai-readme.setHuggingFaceApiKey"
+        },
+        {
+          "command": "ai-readme.viewHistory",
+          "when": "workspaceFolderCount > 0"
+        }
+      ],
+      "explorer/context": [
+        {
+          "command": "ai-readme.generateForFolder",
+          "when": "explorerResourceIsFolder",
+          "group": "navigation@10"
+        },
+        {
+          "command": "ai-readme.generate",
+          "when": "explorerResourceIsFolder",
+          "group": "navigation@10"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "AI README Generator",
+      "properties": {
+        "ai-readme.defaultTemplate": {
+          "type": "string",
+          "default": "openSource",
+          "enum": [
+            "openSource",
+            "library",
+            "startup",
+            "academic",
+            "personal"
+          ],
+          "enumDescriptions": [
+            "Open Source Project - Contribution-friendly with badges",
+            "Library/Package - API docs and installation focus",
+            "Startup/SaaS - Features and marketing focus",
+            "Academic/College - Research and methodology focus",
+            "Personal Project - Simple portfolio-friendly"
+          ],
+          "description": "Default README template to use"
+        },
+        "ai-readme.defaultLanguage": {
+          "type": "string",
+          "default": "english",
+          "enum": [
+            "english",
+            "simpleEnglish",
+            "spanish",
+            "french",
+            "german",
+            "chinese",
+            "japanese",
+            "hindi"
+          ],
+          "description": "Default language for README generation"
+        },
+        "ai-readme.defaultTone": {
+          "type": "string",
+          "default": "professional",
+          "enum": [
+            "professional",
+            "friendly",
+            "minimal",
+            "technical"
+          ],
+          "description": "Default tone for README generation"
+        },
+        "ai-readme.enableBadges": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically add badges to README"
+        }
+      }
+    },
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "ai-readme-sidebar",
+          "title": "AI README Generator",
+          "icon": "resources/sidebar-icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "ai-readme-sidebar": [
+        {
+          "type": "webview",
+          "id": "ai-readme.sidebarView",
+          "name": "README Generator",
+          "contextualTitle": "AI README Generator"
+        }
+      ]
+    },
+    "viewsWelcome": [
+      {
+        "view": "ai-readme.sidebarView",
+        "contents": "Generate professional README files with AI.\n[Generate README](command:ai-readme.generate)\n[Set API Key](command:ai-readme.setApiKey)"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "ai-readme.generate",
+        "key": "ctrl+shift+r",
+        "mac": "cmd+shift+r",
+        "when": "workspaceFolderCount > 0"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile",
+    "lint": "eslint src --ext ts",
+    "package": "vsce package"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "@types/vscode": "^1.85.0",
+    "@typescript-eslint/eslint-plugin": "^6.13.0",
+    "@typescript-eslint/parser": "^6.13.0",
+    "eslint": "^8.54.0",
+    "typescript": "^5.3.2"
+  },
+  "dependencies": {
+    "ignore": "^5.3.0",
+    "marked": "^11.1.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Subhankar-Patra1/Readme-Generator-VS-code-as-extension.git"
+  },
+  "license": "MIT",
+  "pricing": "Free"
+}
